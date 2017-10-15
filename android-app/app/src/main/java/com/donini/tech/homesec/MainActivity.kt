@@ -23,7 +23,7 @@ import com.donini.tech.homesec.ble.BleBeaconController
 import org.altbeacon.beacon.*
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BleBeaconController.IBleBeaconListener {
     val TAG = "HomeSec"
     private val PERMISSION_REQUEST_COARSE_LOCATION = 1
 //    private val REGION_ID = "HomeSecRegion"
@@ -203,6 +203,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun startScan() {
+        beaconController?.setBeaconListener(this)
         beaconController?.startMonitoring(BLE_SERVICE_ID, 0, 0)
 //        try {
 ////            beaconManager?.startMonitoringBeaconsInRegion(Region(REGION_ID, Identifier.parse(BLE_SERVICE_ID), null, null))
@@ -215,6 +216,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun stopScan() {
 //        beaconManager?.stopMonitoringBeaconsInRegion(Region(REGION_ID, Identifier.parse(BLE_SERVICE_ID), null, null))
+        beaconController?.setBeaconListener(null)
         beaconController?.stopMonitoring(BLE_SERVICE_ID, 0, 0)
 //        beaconManager?.stopMonitoringBeaconsInRegion(Region(REGION_ID, null, null, null))
     }
@@ -242,4 +244,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //            }
 //        }
 //    }
+
+    //Beacon Listener callbacks
+    override fun onBeaconAppear(beacon: Beacon) {
+        Log.d("HomeManager", "New Beacon: ${beacon.bluetoothAddress} - ${beacon.distance}")
+    }
+
+    override fun onDistanceUpdate(beacon: Beacon) {
+        Log.d("HomeManager", "Update Beacon: ${beacon.bluetoothAddress} - ${beacon.distance}")
+    }
+
+    override fun onBeaconDisappear(beacon: Beacon) {
+        Log.d("HomeManager", "Beacon disappeared: ${beacon.bluetoothAddress} - ${beacon.distance}")
+    }
 }

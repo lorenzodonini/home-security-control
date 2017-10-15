@@ -6,9 +6,20 @@ import android.content.ServiceConnection
 import android.os.RemoteException
 import android.util.Log
 import org.altbeacon.beacon.*
-import java.util.*
 
 class BleBeaconController(private val context: Context): BeaconConsumer {
+    /**
+     * Beacon Listener interface
+     */
+    interface IBleBeaconListener {
+        fun onBeaconAppear(beacon: Beacon)
+        fun onDistanceUpdate(beacon: Beacon)
+        fun onBeaconDisappear(beacon: Beacon)
+    }
+
+    /**
+     * Beacon format type enum
+     */
     enum class BleBeaconType(val layout: String) {
         IBEACON("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"),
         ALTBEACON(BeaconParser.ALTBEACON_LAYOUT),
@@ -16,18 +27,22 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         EDDYSTONEUDI(BeaconParser.EDDYSTONE_UID_LAYOUT)
     }
 
+    /**
+     * Class content
+     */
     private val TAG = "BleBeaconController"
     private val REGION_ID = "HomeSecRegion"
     private val beaconManager: BeaconManager = BeaconManager.getInstanceForApplication(context)
-    private var beacons: MutableList<Beacon> = arrayListOf()
+    private var beacons: MutableMap<String, Beacon> = hashMapOf()
     private var regions: MutableList<Region> = arrayListOf()
+    private var beaconListener: IBleBeaconListener? = null
 
     init {
         beaconManager.bind(this)
     }
 
     fun getCurrentBeacons(): List<Beacon> {
-        return beacons
+        return beacons.values.toList()
     }
 
     fun addBeaconType(type: BleBeaconType) {
@@ -71,6 +86,32 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         beaconManager.unbind(this)
     }
 
+    fun setBeaconListener(beaconListener: IBleBeaconListener?) {
+        this.beaconListener = beaconListener
+    }
+
+    private fun updateBeacons(newBeacons: Collection<Beacon>) {
+        val oldBeacons = beacons.toMap()
+        beacons = hashMapOf()
+        for (beacon in newBeacons) {
+            beacons.put(beacon.bluetoothAddress, beacon)
+        }
+        //Notify disappeared beacons
+        for (beacon in oldBeacons) {
+            if (!beacons.containsKey(beacon.key)) {
+                beaconListener?.onBeaconDisappear(beacon.value)
+            }
+        }
+        //Notify appeared beacons
+        for (beacon in beacons) {
+            if (!oldBeacons.containsKey(beacon.key)) {
+                beaconListener?.onBeaconAppear(beacon.value)
+            } else {
+                beaconListener?.onDistanceUpdate(beacon.value)
+            }
+        }
+    }
+
     // Beacon Consumer
     override fun onBeaconServiceConnect() {
         Log.i(TAG, "Beacon service connected")
@@ -90,9 +131,10 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
             }
         })
         beaconManager.addRangeNotifier { beacons, region ->
-            for (beacon in beacons) {
-                Log.w(TAG, "[${beacon.bluetoothAddress} - ${beacon.bluetoothName}] distance: ${beacon.distance}")
-            }
+            updateBeacons(beacons)
+//            for (beacon in beacons) {
+//                Log.w(TAG, "[${beacon.bluetoothAddress} - ${beacon.bluetoothName}] distance: ${beacon.distance}")
+//            }
         }
     }
 
