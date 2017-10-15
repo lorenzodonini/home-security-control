@@ -19,6 +19,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ToggleButton
+import com.donini.tech.homesec.ble.BleBeacon
 import com.donini.tech.homesec.ble.BleBeaconController
 import org.altbeacon.beacon.*
 
@@ -26,10 +27,7 @@ import org.altbeacon.beacon.*
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BleBeaconController.IBleBeaconListener {
     val TAG = "HomeSec"
     private val PERMISSION_REQUEST_COARSE_LOCATION = 1
-//    private val REGION_ID = "HomeSecRegion"
     private val BLE_SERVICE_ID = "15ead454-c858-4a23-bb60-19e5cf1bcf2f"
-//    private val BLE_SERVICE_ID = null
-//    private var beaconManager: BeaconManager? = null
     private var beaconController: BleBeaconController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,15 +69,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-
-//        beaconManager = BeaconManager.getInstanceForApplication(this)
-//        // Add parser for AltBeacon
-////        beaconManager?.beaconParsers?.add(BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"))
-//        // Add parser for Eddystone URL
-//        beaconManager?.beaconParsers?.add(BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"))
-//        beaconManager?.beaconParsers?.add(BeaconParser().setBeaconLayout(BeaconParser.EDDYSTONE_URL_LAYOUT))
-//        beaconManager?.beaconParsers?.add(BeaconParser().setBeaconLayout(BeaconParser.ALTBEACON_LAYOUT))
-//        beaconManager?.bind(this)
         beaconController = BleBeaconController(this)
         beaconController?.addBeaconType(BleBeaconController.BleBeaconType.IBEACON)
 
@@ -205,56 +194,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun startScan() {
         beaconController?.setBeaconListener(this)
         beaconController?.startMonitoring(BLE_SERVICE_ID, 0, 0)
-//        try {
-////            beaconManager?.startMonitoringBeaconsInRegion(Region(REGION_ID, Identifier.parse(BLE_SERVICE_ID), null, null))
-//
-//            beaconManager?.startMonitoringBeaconsInRegion(Region(REGION_ID, null, null, null))
-//        } catch (e: RemoteException) {
-//            Log.i(TAG, "Couldn't start monitoring beacons in region")
-//        }
     }
 
     private fun stopScan() {
-//        beaconManager?.stopMonitoringBeaconsInRegion(Region(REGION_ID, Identifier.parse(BLE_SERVICE_ID), null, null))
         beaconController?.setBeaconListener(null)
         beaconController?.stopMonitoring(BLE_SERVICE_ID, 0, 0)
-//        beaconManager?.stopMonitoringBeaconsInRegion(Region(REGION_ID, null, null, null))
     }
-
-//    override fun onBeaconServiceConnect() {
-//        Log.i(TAG, "Beacon service connected")
-//        beaconManager?.addMonitorNotifier(object : MonitorNotifier {
-//            override fun didEnterRegion(region: Region) {
-//                Log.i(TAG, "New beacon in region ${region.uniqueId}")
-//                beaconManager?.startRangingBeaconsInRegion(region)
-//            }
-//
-//            override fun didExitRegion(region: Region) {
-//                Log.i(TAG, "No longer see a beacon in region ${region.uniqueId}")
-//                beaconManager?.stopRangingBeaconsInRegion(region)
-//            }
-//
-//            override fun didDetermineStateForRegion(state: Int, region: Region) {
-//                Log.i(TAG, "I have just switched from seeing/not seeing beacons: $state")
-//            }
-//        })
-//        beaconManager?.addRangeNotifier { beacons, region ->
-//            for (beacon in beacons) {
-//                Log.w(TAG, "[${beacon.bluetoothAddress} - ${beacon.bluetoothName}] distance: ${beacon.distance}")
-//            }
-//        }
-//    }
 
     //Beacon Listener callbacks
-    override fun onBeaconAppear(beacon: Beacon) {
-        Log.d("HomeManager", "New Beacon: ${beacon.bluetoothAddress} - ${beacon.distance}")
+    override fun onBeaconAppear(beacon: BleBeacon) {
+        Log.i("HomeManager", "New Beacon: ${beacon.beacon.bluetoothAddress} - ${beacon.beacon.distance}")
     }
 
-    override fun onDistanceUpdate(beacon: Beacon) {
-        Log.d("HomeManager", "Update Beacon: ${beacon.bluetoothAddress} - ${beacon.distance}")
+    override fun onDistanceUpdate(beacon: BleBeacon) {
+        Log.i("HomeManager", "Update Beacon: ${beacon.beacon.bluetoothAddress} - ${beacon.beacon.distance}")
     }
 
-    override fun onBeaconDisappear(beacon: Beacon) {
-        Log.d("HomeManager", "Beacon disappeared: ${beacon.bluetoothAddress} - ${beacon.distance}")
+    override fun onBeaconDisappear(beacon: BleBeacon) {
+        Log.i("HomeManager", "Beacon disappeared: ${beacon.beacon.bluetoothAddress} - ${beacon.beacon.distance}")
     }
 }

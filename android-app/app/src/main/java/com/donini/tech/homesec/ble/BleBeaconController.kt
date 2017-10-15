@@ -6,15 +6,16 @@ import android.content.ServiceConnection
 import android.os.RemoteException
 import android.util.Log
 import org.altbeacon.beacon.*
+import org.joda.time.Duration
 
 class BleBeaconController(private val context: Context): BeaconConsumer {
     /**
      * Beacon Listener interface
      */
     interface IBleBeaconListener {
-        fun onBeaconAppear(beacon: Beacon)
-        fun onDistanceUpdate(beacon: Beacon)
-        fun onBeaconDisappear(beacon: Beacon)
+        fun onBeaconAppear(beacon: BleBeacon)
+        fun onDistanceUpdate(beacon: BleBeacon)
+        fun onBeaconDisappear(beacon: BleBeacon)
     }
 
     /**
@@ -32,17 +33,20 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
      */
     private val TAG = "BleBeaconController"
     private val REGION_ID = "HomeSecRegion"
+    private val DEFAULT_TIMEOUT: Long = 10000
     private val beaconManager: BeaconManager = BeaconManager.getInstanceForApplication(context)
-    private var beacons: MutableMap<String, Beacon> = hashMapOf()
+//    private var beacons: MutableMap<String, BleBeacon> = hashMapOf()
+    private var beacons: MutableSet<BleBeacon> = hashSetOf()
     private var regions: MutableList<Region> = arrayListOf()
     private var beaconListener: IBleBeaconListener? = null
+    var beaconTimeout = Duration.millis(DEFAULT_TIMEOUT)
 
     init {
         beaconManager.bind(this)
     }
 
-    fun getCurrentBeacons(): List<Beacon> {
-        return beacons.values.toList()
+    fun getCurrentBeacons(): List<BleBeacon> {
+        return beacons.toList()
     }
 
     fun addBeaconType(type: BleBeaconType) {
@@ -91,23 +95,22 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
     }
 
     private fun updateBeacons(newBeacons: Collection<Beacon>) {
-        val oldBeacons = beacons.toMap()
-        beacons = hashMapOf()
-        for (beacon in newBeacons) {
-            beacons.put(beacon.bluetoothAddress, beacon)
-        }
-        //Notify disappeared beacons
-        for (beacon in oldBeacons) {
-            if (!beacons.containsKey(beacon.key)) {
-                beaconListener?.onBeaconDisappear(beacon.value)
+        //Cleanup old beacons
+        for (beacon in beacons.iterator()) {
+            if (beacon.timestamp.plus(beaconTimeout).isBeforeNow) {
+                beacons.remove(beacon)
+                beaconListener?.onBeaconDisappear(beacon)
             }
         }
-        //Notify appeared beacons
-        for (beacon in beacons) {
-            if (!oldBeacons.containsKey(beacon.key)) {
-                beaconListener?.onBeaconAppear(beacon.value)
+        //Add/update beacons
+        for (beacon in newBeacons) {
+            val newBeacon = BleBeacon(beacon)
+            val updating = beacons.remove(newBeacon)
+            beacons.add(newBeacon)
+            if (updating) {
+                beaconListener?.onDistanceUpdate(newBeacon)
             } else {
-                beaconListener?.onDistanceUpdate(beacon.value)
+                beaconListener?.onBeaconAppear(newBeacon)
             }
         }
     }
@@ -115,6 +118,9 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
     // Beacon Consumer
     override fun onBeaconServiceConnect() {
         Log.i(TAG, "Beacon service connected")
+        val defaultRegion = Region(REGION_ID, null, null, null)
+        beaconManager.stopRangingBeaconsInRegion(defaultRegion)
+        beaconManager.stopMonitoringBeaconsInRegion(defaultRegion)
         beaconManager.addMonitorNotifier(object : MonitorNotifier {
             override fun didEnterRegion(region: Region) {
                 Log.i(TAG, "New beacon in region ${region.uniqueId}")
@@ -132,9 +138,6 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         })
         beaconManager.addRangeNotifier { beacons, region ->
             updateBeacons(beacons)
-//            for (beacon in beacons) {
-//                Log.w(TAG, "[${beacon.bluetoothAddress} - ${beacon.bluetoothName}] distance: ${beacon.distance}")
-//            }
         }
     }
 
