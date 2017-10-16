@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:clipToPadding="false">
+
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/house"
+            android:id="@+id/alarmButton"
+            android:padding="50dp"
+            android:background="@drawable/toggle_on"
+            android:elevation="5dp"
+            android:layout_centerInParent="true"/>
+</RelativeLayout>
