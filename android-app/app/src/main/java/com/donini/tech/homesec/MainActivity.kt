@@ -21,6 +21,7 @@ import android.view.MenuItem
 import android.widget.ToggleButton
 import com.donini.tech.homesec.ble.BleBeacon
 import com.donini.tech.homesec.ble.BleBeaconController
+import kotlinx.android.synthetic.main.content_main.*
 import org.altbeacon.beacon.*
 
 
@@ -71,6 +72,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         beaconController = BleBeaconController(this)
         beaconController?.addBeaconType(BleBeaconController.BleBeaconType.IBEACON)
+
+        alarmToggleButton.setClickListener { Log.i("LOL", "Clicked") }
 
         val scanToggle = findViewById(R.id.scanToggleButton) as? ToggleButton
         scanToggle?.setOnCheckedChangeListener { _, isChecked ->
