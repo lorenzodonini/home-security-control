@@ -18,7 +18,6 @@ import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ToggleButton
 import com.donini.tech.homesec.ble.BleBeacon
 import com.donini.tech.homesec.ble.BleBeaconController
 import kotlinx.android.synthetic.main.content_main.*
@@ -40,12 +39,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // Checking if bluetooth is enabled first
         checkBluetooth()
-
-        val fab = findViewById(R.id.fab) as FloatingActionButton
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
 
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
         val toggle = ActionBarDrawerToggle(
@@ -72,6 +65,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         beaconController = BleBeaconController(this)
         beaconController?.addBeaconType(BleBeaconController.BleBeaconType.IBEACON)
+        beaconController?.setBeaconListener(this)
 
         alarmToggleButton.setClickListener { Log.i("LOL", "Clicked") }
         scanToggleButton.setOnCheckedChangeListener { _, isChecked ->
@@ -85,6 +79,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onDestroy() {
         super.onDestroy()
+        beaconController?.setBeaconListener(null)
         beaconController?.unbind()
     }
 
@@ -193,12 +188,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun startScan() {
-        beaconController?.setBeaconListener(this)
         beaconController?.startMonitoring(BLE_SERVICE_ID, 0, 0)
     }
 
     private fun stopScan() {
-        beaconController?.setBeaconListener(null)
         beaconController?.stopMonitoring(BLE_SERVICE_ID, 0, 0)
     }
 
@@ -213,5 +206,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onBeaconDisappear(beacon: BleBeacon) {
         Log.i("HomeManager", "Beacon disappeared: ${beacon.beacon.bluetoothAddress} - ${beacon.beacon.distance}")
+    }
+
+    override fun onBleReady() {
+        //Default start scan
+        scanToggleButton.isChecked = true
     }
 }

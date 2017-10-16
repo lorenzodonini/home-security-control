@@ -16,6 +16,7 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         fun onBeaconAppear(beacon: BleBeacon)
         fun onDistanceUpdate(beacon: BleBeacon)
         fun onBeaconDisappear(beacon: BleBeacon)
+        fun onBleReady()
     }
 
     /**
@@ -139,6 +140,7 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         beaconManager.addRangeNotifier { beacons, region ->
             updateBeacons(beacons)
         }
+        beaconListener?.onBleReady()
     }
 
     override fun unbindService(p0: ServiceConnection?) {
