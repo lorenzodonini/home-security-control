@@ -74,9 +74,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         beaconController?.addBeaconType(BleBeaconController.BleBeaconType.IBEACON)
 
         alarmToggleButton.setClickListener { Log.i("LOL", "Clicked") }
-
-        val scanToggle = findViewById(R.id.scanToggleButton) as? ToggleButton
-        scanToggle?.setOnCheckedChangeListener { _, isChecked ->
+        scanToggleButton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 this.startScan()
             } else {
