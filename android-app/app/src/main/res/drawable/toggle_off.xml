@@ -4,8 +4,8 @@
         <shape android:shape="oval">
             <gradient
                     android:angle="270"
-                    android:startColor="#FFC107"
-                    android:endColor="#FFA000"
+                    android:startColor="#FF5722"
+                    android:endColor="#E64A19"
                     android:type="linear" />
         </shape>
     </item>
@@ -13,8 +13,8 @@
         <shape android:shape="oval">
             <gradient
                     android:angle="270"
-                    android:startColor="#FFC107"
-                    android:endColor="#FFA000"
+                    android:startColor="#FF5722"
+                    android:endColor="#E64A19"
                     android:type="linear" />
         </shape>
     </item>
@@ -22,8 +22,8 @@
         <shape android:shape="oval">
             <gradient
                     android:angle="90"
-                    android:startColor="#FF9800"
-                    android:endColor="#F57C00"
+                    android:startColor="#F44336"
+                    android:endColor="#C62828"
                     android:type="linear" />
         </shape>
     </item>
