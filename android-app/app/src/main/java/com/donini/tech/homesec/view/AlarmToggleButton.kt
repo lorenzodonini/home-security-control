@@ -15,12 +15,18 @@ class AlarmToggleButton @JvmOverloads constructor(context: Context,
     enum class State(val backgroundResource: Int) {
         ON(R.drawable.toggle_on),
         PENDING(R.drawable.toggle_pending),
-        OFF(R.drawable.toggle_off)
+        OFF(R.drawable.toggle_off),
+        UNKNOWN(R.drawable.toggle_unknown)
     }
 
     var state = State.OFF
     set(value) {
         setBackgroundResource(value.backgroundResource)
+        if (value == State.UNKNOWN) {
+            disabledIndicator.visibility = View.VISIBLE
+        } else {
+            disabledIndicator.visibility = View.GONE
+        }
     }
 
     init {
