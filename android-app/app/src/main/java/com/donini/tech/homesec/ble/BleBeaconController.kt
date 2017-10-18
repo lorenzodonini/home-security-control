@@ -12,7 +12,7 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
     /**
      * Beacon Listener interface
      */
-    interface IBleBeaconListener {
+    interface BleBeaconDelegate {
         fun onBeaconAppear(beacon: BleBeacon)
         fun onDistanceUpdate(beacon: BleBeacon)
         fun onBeaconDisappear(beacon: BleBeacon)
@@ -36,10 +36,9 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
     private val REGION_ID = "HomeSecRegion"
     private val DEFAULT_TIMEOUT: Long = 10000
     private val beaconManager: BeaconManager = BeaconManager.getInstanceForApplication(context)
-//    private var beacons: MutableMap<String, BleBeacon> = hashMapOf()
     private var beacons: MutableSet<BleBeacon> = hashSetOf()
     private var regions: MutableList<Region> = arrayListOf()
-    private var beaconListener: IBleBeaconListener? = null
+    private var beaconDelegate: BleBeaconDelegate? = null
     var beaconTimeout = Duration.millis(DEFAULT_TIMEOUT)
 
     init {
@@ -91,8 +90,8 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         beaconManager.unbind(this)
     }
 
-    fun setBeaconListener(beaconListener: IBleBeaconListener?) {
-        this.beaconListener = beaconListener
+    fun setBeaconListener(beaconDelegate: BleBeaconDelegate?) {
+        this.beaconDelegate = beaconDelegate
     }
 
     private fun updateBeacons(newBeacons: Collection<Beacon>) {
@@ -100,7 +99,7 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         for (beacon in beacons.iterator()) {
             if (beacon.timestamp.plus(beaconTimeout).isBeforeNow) {
                 beacons.remove(beacon)
-                beaconListener?.onBeaconDisappear(beacon)
+                beaconDelegate?.onBeaconDisappear(beacon)
             }
         }
         //Add/update beacons
@@ -109,9 +108,9 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
             val updating = beacons.remove(newBeacon)
             beacons.add(newBeacon)
             if (updating) {
-                beaconListener?.onDistanceUpdate(newBeacon)
+                beaconDelegate?.onDistanceUpdate(newBeacon)
             } else {
-                beaconListener?.onBeaconAppear(newBeacon)
+                beaconDelegate?.onBeaconAppear(newBeacon)
             }
         }
     }
@@ -140,7 +139,7 @@ class BleBeaconController(private val context: Context): BeaconConsumer {
         beaconManager.addRangeNotifier { beacons, region ->
             updateBeacons(beacons)
         }
-        beaconListener?.onBleReady()
+        beaconDelegate?.onBleReady()
     }
 
     override fun unbindService(p0: ServiceConnection?) {

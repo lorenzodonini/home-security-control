@@ -8,4 +8,13 @@
 
     <string name="beacon_scan_on">Stop Scan</string>
     <string name="beacon_scan_off">Start Scan</string>
+
+    <!-- Status Text -->
+    <string name="status_alarm_off">Alarm is currently not active</string>
+    <string name="status_alarm_on">Alarm is currently active</string>
+    <string name="status_alarm_activating">Activating alarm…</string>
+    <string name="status_alarm_deactivating">Deactivating alarm…</string>
+    <string name="status_at_home">You are currently at home</string>
+    <string name="status_no_connection">Couldn\'t contact home server</string>
+    <string name="status_intrusion">Intrusion detected!</string>
 </resources>

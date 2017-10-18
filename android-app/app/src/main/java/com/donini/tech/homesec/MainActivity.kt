@@ -6,8 +6,6 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -24,7 +22,7 @@ import kotlinx.android.synthetic.main.content_main.*
 import org.altbeacon.beacon.*
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BleBeaconController.IBleBeaconListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BleBeaconController.BleBeaconDelegate {
     val TAG = "HomeSec"
     private val PERMISSION_REQUEST_COARSE_LOCATION = 1
     private val BLE_SERVICE_ID = "15ead454-c858-4a23-bb60-19e5cf1bcf2f"

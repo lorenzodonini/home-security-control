@@ -32,5 +32,15 @@
                                                     android:layout_marginBottom="8dp"
                                                     app:layout_constraintVertical_bias="0.5"
                                                     android:id="@+id/alarmToggleButton" />
+    <TextView
+            android:text="@string/status_alarm_off"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/statusText"
+            android:textAppearance="@android:style/TextAppearance.Material.Large" android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent" android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/alarmToggleButton" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="50dp"/>
 
 </android.support.constraint.ConstraintLayout>
