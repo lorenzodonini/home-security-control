@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "Wire.h"
 #include "Particle.h"
+#include "MQTT/MQTT.h"
 
 #define PIN D0
 #define DEVICE_BUS 1
@@ -13,13 +14,22 @@
 #define DATA_CFG_REG 0x0E
 #define SLEEP_CNT_REG 0x29
 
-char buffer[7];
-
 struct SensorData {
   float x;
   float y;
   float z;
 };
+
+char buffer[7];
+char topic[14] = "zone1/door";
+char id[8] = "kamino";
+uint8_t broker[] = { 192,168,0,180 };
+void callback(char* topic, uint8_t* payload, unsigned int length);
+MQTT client(broker, 1883, callback);
+
+void callback(char* topic, uint8_t* payload, unsigned int length) {
+    Serial.println("Callback triggered");
+}
 
 SensorData parseData() {
   SensorData result;
@@ -78,6 +88,15 @@ void sleep() {
 void setup() {
   Wire.begin(); // join i2c bus as master
   Serial.begin(9600); // start serial for output
+
+  //Setup MQTT
+  if (client.connect(id)) {
+    Serial.println("Connected to MQTT borker");
+  } else {
+    Serial.println("Failed to connect to MQTT borker");
+  }
+
+  //Setup I2C sensor
   Wire.beginTransmission(DEVICE_ADDRESS);
   Wire.write(DATA_CFG_REG);
   Wire.write(0x00);
@@ -101,6 +120,11 @@ void loop() {
   data = parseData();
   sprintf(output, "Data -> x: %f, y: %f, z: %f", data.x, data.y, data.z);
   Serial.println(output);        // wait 5 seconds for next scan
+  if (client.isConnected()) {
+    client.publish(topic, output);
+  } else {
+    Serial.println("Not connected to client, cannot publish data");
+  }
 
   delay(1000);
 }
