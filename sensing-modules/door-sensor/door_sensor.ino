@@ -6,7 +6,6 @@
 #include "Particle.h"
 
 #define PIN D0
-#define LED D7
 #define DEVICE_BUS 1
 #define DEVICE_ADDRESS 0x1D
 #define DATA_REG 0x00
@@ -14,7 +13,6 @@
 #define DATA_CFG_REG 0x0E
 #define SLEEP_CNT_REG 0x29
 
-int state = 0;
 char buffer[7];
 
 struct SensorData {
@@ -78,15 +76,13 @@ void sleep() {
 }
 
 void setup() {
-  pinMode(LED, OUTPUT);
-
   Wire.begin(); // join i2c bus as master
   Serial.begin(9600); // start serial for output
   Wire.beginTransmission(DEVICE_ADDRESS);
   Wire.write(DATA_CFG_REG);
   Wire.write(0x00);
   if (Wire.endTransmission() > 0) {
-    Serial.println("Error setting cfg register!\n");
+    Serial.println("Error setting cfg register!");
   }
   standby();
   activate();
@@ -102,17 +98,9 @@ void loop() {
     buffer[i++] = Wire.read();
   }
 
-  /*sprintf(output, "Read %d bytes", i);
-  Serial.println(output);*/
-
   data = parseData();
   sprintf(output, "Data -> x: %f, y: %f, z: %f", data.x, data.y, data.z);
-  Serial.println(output);
-  /*sprintf(output, "Data: %x %x %x %x %x %x %x", buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6]);
-  Serial.println(output);*/
+  Serial.println(output);        // wait 5 seconds for next scan
 
-  digitalWrite(LED, state ? HIGH : LOW);
-  state = !state;
-  Serial.println("Going to sleep...");
-  delay(5000);           // wait 5 seconds for next scan
+  delay(1000);
 }
