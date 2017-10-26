@@ -1,9 +1,7 @@
 // Test project
 
 //#include "application.h"
-#include <stdio.h>
-#include "DoorSensor.h"
-#include "MQTT/MQTT.h"
+#include "DoorController.h"
 
 /*#define PIN D0
 #define DEVICE_BUS 1
@@ -13,45 +11,31 @@
 #define DATA_CFG_REG 0x0E
 #define SLEEP_CNT_REG 0x29*/
 
-SerialLogHandler logHandler;
-DoorSensor doorSensor;
-char topic[14] = "zone1/door";
-char id[8] = "kamino";
-uint8_t broker[] = { 192,168,0,180 };
-void callback(char* topic, uint8_t* payload, unsigned int length);
-MQTT client(broker, 1883, callback);
-
 void callback(char* topic, uint8_t* payload, unsigned int length) {
     Serial.println("Callback triggered");
 }
 
+SerialLogHandler logHandler;
+uint8_t brokerIp[] = { 192,168,0,180 };
+uint16_t defaultPort = 1883;
+
+MQTT mqttClient(brokerIp, defaultPort, callback);
+DoorController doorController(&mqttClient);
+
 void setup() {
   Serial.begin(9600); // start serial for output
-
   //Setup MQTT
-  if (client.connect(id)) {
-    Serial.println("Connected to MQTT borker");
+  if (mqttClient.connect(System.deviceID())) {
+    Log.info("Connected to MQTT broker");
   } else {
-    Serial.println("Failed to connect to MQTT borker");
+    Log.warn("Failed to connect to MQTT broker");
   }
-
-  doorSensor.standby();
-  doorSensor.activate();
+  doorController.enableMonitoring();
+  Log.info("Door monitoring started");
 }
 
 void loop() {
-  /*char output[256];*/
-
-  doorSensor.readData();
-
-  /*data = parseData();
-  sprintf(output, "Data -> x: %f, y: %f, z: %f", data.x, data.y, data.z);
-  Serial.println(output);        // wait 5 seconds for next scan*/
-  if (client.isConnected()) {
-    client.publish(topic, "New data");
-  } else {
-    Serial.println("Not connected to client, cannot publish data");
-  }
-
+  mqttClient.loop();
+  doorController.monitor();
   delay(1000);
 }
