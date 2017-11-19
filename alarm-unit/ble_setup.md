@@ -21,4 +21,5 @@ Now we can install gattlib:
 - `sed -ie 's/boost_python-py34/boost_python-py35/' setup.py`
 - `pip3 install .`
 
+- `sudo pip3 install bluepy`
 
