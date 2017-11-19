@@ -18,6 +18,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.donini.tech.homesec.ble.BleBeacon
 import com.donini.tech.homesec.ble.BleBeaconController
+import com.ncorti.slidetoact.SlideToActView
 import kotlinx.android.synthetic.main.content_main.*
 import org.altbeacon.beacon.*
 
@@ -73,6 +74,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 this.stopScan()
             }
         }
+//        slider.onSlideCompleteListener = SlideToActView.OnSlideCompleteListener {
+//
+//        }
     }
 
     override fun onDestroy() {
